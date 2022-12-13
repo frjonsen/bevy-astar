@@ -1,6 +1,9 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::PresentMode};
 use bevy_inspector_egui::WorldInspectorPlugin;
 
+mod position;
+
+use position::Position;
 #[derive(Bundle)]
 struct Topography {
     spatial: SpatialBundle,
@@ -8,9 +11,6 @@ struct Topography {
 
 #[derive(Component)]
 struct Altitude(u8);
-
-#[derive(Component)]
-struct Position(Vec2);
 
 #[derive(Resource)]
 struct InputMap(Vec<Vec<u8>>);
@@ -91,7 +91,7 @@ fn setup(
                 255 => Color::rgb_u8(0, 255, 0),
                 _ => Color::rgb_u8(0, 0, 255 / 27 * a),
             };
-            let position = Vec2::new(x as f32, y as f32);
+            let position = Position(x, y);
 
             let mesh = MaterialMesh2dBundle {
                 mesh: meshes
@@ -99,8 +99,8 @@ fn setup(
                     .into(),
                 material: materials.add(ColorMaterial::from(color)),
                 transform: Transform::from_translation(Vec3::new(
-                    position.x * tile_size.0,
-                    position.y * tile_size.0,
+                    position.0 as f32 * tile_size.0,
+                    position.1 as f32 * tile_size.0,
                     0.,
                 )),
                 ..default()
@@ -108,7 +108,7 @@ fn setup(
             let p = Point {
                 altitude: Altitude(*a),
                 mesh,
-                position: Position(position),
+                position,
             };
             parsed_line.push(p);
         }
